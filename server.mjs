@@ -95,7 +95,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    const match = url.pathname.match(/^\\/i\\/([a-f0-9-]{36})\\/(.*)$/i);
+    const match = url.pathname.match(new RegExp('^/i/([a-f0-9-]{36})/(.*)$', 'i'));
     if (req.method === 'GET' && match) {
       const id = match[1];
       let imagePath;
