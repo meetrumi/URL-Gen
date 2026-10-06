@@ -16,7 +16,7 @@ const maxBytes = Number(process.env.MAX_IMAGE_BYTES || 15 * 1024 * 1024);
 const publicBase = (process.env.PUBLIC_BASE_URL || `http://${host}:${port}`).replace(/\/$/, '');
 const allowed = new Map([
   ['image/jpeg', '.jpg'], ['image/png', '.png'], ['image/gif', '.gif'],
-  ['image/bmp', '.bmp'], ['image/tiff', '.tiff'], ['image/webp', '.webp'],
+  ['image/bmp', '.bmp'], ['image/x-ms-bmp', '.bmp'], ['image/tiff', '.tiff'], ['image/webp', '.webp'],
   ['image/avif', '.avif'], ['image/heic', '.heic'], ['image/heif', '.heic']
 ]);
 await mkdir(dataDir, { recursive: true });
@@ -41,7 +41,8 @@ function detectType(bytes) {
   if (/^GIF8[79]a$/.test(bytes.subarray(0, 6).toString('ascii'))) return 'image/gif';
   if (bytes.subarray(0, 2).toString('ascii') === 'BM') return 'image/bmp';
   const head = bytes.subarray(0, 4).toString('ascii');
-  if (head === 'II*\\0' || head === 'MM\\0*') return 'image/tiff';
+  if (bytes[0] === 0x49 && bytes[1] === 0x49 && bytes[2] === 0x2a && bytes[3] === 0) return 'image/tiff';
+  if (bytes[0] === 0x4d && bytes[1] === 0x4d && bytes[2] === 0 && bytes[3] === 0x2a) return 'image/tiff'; return 'image/tiff';
   if (bytes.subarray(0, 4).toString('ascii') === 'RIFF' && bytes.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
   if (bytes.length >= 12 && bytes.subarray(4, 8).toString('ascii') === 'ftyp') {
     const brand = bytes.subarray(8, 12).toString('ascii');
